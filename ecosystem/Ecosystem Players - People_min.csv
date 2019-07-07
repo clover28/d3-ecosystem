@@ -1,0 +1,18 @@
+"Player","Lifecycle","Scale_m","Reach","Admissions_influence"
+"Parents/Guardians",0,34.4,10,650
+"Mentors",0,16.7,5,18
+"General Guidance Counselors",1,0.14,500,3.75
+"Teachers",1,1.1,100,160
+"Principals",1,0.065,700,0.5
+"Superintendents",1,0.0018,1000,0
+"High School Atheletic Coaches",1,0.024,50,24
+"College Counselors (IECs)",1,0.0075,30,60
+"Academic/Test Prep Tutors",1,0.035,30,48
+"College Admissions Officers",1,0.021,2000,15
+"College Admissions Deans",1,0.003,2000,0
+"College Athletic Coaches",1,0.043,100,5
+"College Students",0,16,5,32
+"College Alumni",1,73.8,10,12
+"Professors/instructors",1,0.38,10,4
+"Financial Aid Officers",1,0.03,2000,25
+"Title IX coordinators",1,0.03,2000,0

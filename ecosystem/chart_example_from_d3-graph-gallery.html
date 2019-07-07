@@ -1,0 +1,183 @@
+<!-- Code from d3-graph-gallery.com -->
+<!DOCTYPE html>
+<meta charset="utf-8">
+
+<!-- Load d3.js -->
+<script src="https://d3js.org/d3.v4.js"></script>
+
+<!-- Load color scale -->
+<script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
+
+<head>
+  <link href="https://fonts.googleapis.com/css?family=Chakra+Petch&display=swap" rel="stylesheet">
+  <title>Ecosystem Players</title>
+</head>
+
+<!-- Create a div where the graph will take place -->
+<h1>Ecosystem Individual Players</h1>
+<p>This graph contains individual players in the college admissions ecosystem. The size of the bubbles represent the number of high school students the individual can reach. </p>
+<p>*Admissions influence is calculated by multiplying the individual's influence as perceived by students (scale of 0-5), the frequency of contact with students (days per month), and relevance to admissions (scale of 0-5).</p>
+<p><span id="green">Green</span> = short lifecycle; <span id="orange">Orange</span> = long lifecycle</p>
+<div id="my_dataviz"></div>
+
+<!-- A bit of CSS: change stroke color of circle on hover (white -> black) -->
+<style>
+
+.bubbles {
+  stroke-width: 2px;
+  stroke: white;
+  opacity: 0.8;
+}
+.bubbles:hover {
+  stroke: #FF5733;
+}
+
+body {
+  font-family: 'Chakra Petch', Helvetica, sans-serif;
+  color: rgba(0, 0, 0, 0.9)
+}
+
+#my_dataviz svg {
+  display: block;
+  margin: auto;
+}
+
+#my_dataviz {
+  width: 60%;
+  margin: auto;
+}
+
+h1 {
+  text-align: center;
+  margin-bottom: 48px;
+}
+
+p {
+  width: 60%;
+  margin: auto;
+  padding-bottom: 24px;
+}
+
+#green {
+  color: rgb(102, 194, 165);
+}
+
+#orange {
+  color: rgb(252, 141, 98);
+}
+</style>
+
+
+<script>
+
+// set the dimensions and margins of the graph
+var margin = {top: 40, right: 20, bottom: 50, left: 80},
+    width = 500 - margin.left - margin.right,
+    height = 420 - margin.top - margin.bottom;
+
+// append the svg object to the body of the page
+var svg = d3.select("#my_dataviz")
+  .append("svg")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+  .append("g")
+    .attr("transform",
+          "translate(" + margin.left + "," + margin.top + ")");
+
+//Read the data
+d3.csv("Ecosystem Players - People_min.csv", function(data) {
+
+  // Add X axis
+  var x = d3.scaleLog()
+    .domain([0.001, 100])
+    .range([0, width]);
+  svg.append("g")
+    .attr("transform", "translate(0," + height + ")")
+    .call(d3.axisBottom(x).ticks(10, ",.1s").tickSize(6,0));
+  svg.append("text")
+    .attr("transform", "translate("+ width/2 +", "+ height*1.1 +")")
+    .style("text-anchor", "middle")
+    .attr("fill", "black")
+    .text("Scale (Million)");
+
+
+  // Add Y axis
+  var y = d3.scaleLog()
+    .domain([0.5, 650])
+    .range([height-30, 0]);
+  svg.append("g")
+    .call(d3.axisLeft(y).ticks(10, ",.1s").tickSize(6,0));
+    svg.append("text")
+    .attr("transform", "translate(-40, "+ height/2 +")rotate(-90)")
+    .style("text-anchor", "middle")
+    .attr("fill", "black")
+    .text("Admissions Influence");
+
+    var y0 = d3.scaleOrdinal()
+    .domain([0, 0.5])
+    .range([height, height-30]);
+    svg.append("g")
+    .call(d3.axisLeft(y0).ticks(1));
+    // .attr("transform", "translate(0, "+ height +")");
+
+  // Add a scale for bubble size
+  var z = d3.scaleLinear()
+    .domain([5,2000])
+    .range([8, 30]);
+
+  // Add a scale for bubble color
+  var myColor = d3.scaleOrdinal()
+    .domain([0, 1])
+    .range(d3.schemeSet2);
+        
+  // -1- Create a tooltip div that is hidden by default:
+  var tooltip = d3.select("#my_dataviz")
+    .append("div")
+      .style("opacity", 0)
+      .attr("class", "tooltip")
+      .style("background-color", "black")
+      .style("border-radius", "5px")
+      .style("padding", "10px")
+      .style("color", "white")
+
+  // -2- Create 3 functions to show / update (when mouse move but stay on same circle) / hide the tooltip
+  var showTooltip = function(d) {
+    tooltip
+      .transition()
+      .duration(200)
+    tooltip
+      .style("opacity", 1)
+      .html("Player: " + d.Player)
+      .style("left", (d3.mouse(this)[0]+30) + "px")
+      .style("top", (d3.mouse(this)[1]+30) + "px")
+  }
+  var moveTooltip = function(d) {
+    tooltip
+      .style("left", (d3.mouse(this)[0]+30) + "px")
+      .style("top", (d3.mouse(this)[1]+30) + "px")
+  }
+  var hideTooltip = function(d) {
+    tooltip
+      .transition()
+      .duration(200)
+      .style("opacity", 0)
+  }
+
+  // Add dots
+  svg.append('g')
+    .selectAll("dot")
+    .data(data)
+    .enter()
+    .append("circle")
+      .attr("class", "bubbles")
+      .attr("cx", function (d) { return x(d.Scale_m); } )
+      .attr("cy", function (d) { if (d.Admissions_influence != 0) return y(d.Admissions_influence); else return y0(d.Admissions_influence); } )
+      .attr("r", function (d) { return z(d.Reach); } )
+      .style("fill", function (d) { return myColor(d.Lifecycle); } )
+    // -3- Trigger the functions
+    .on("mouseover", showTooltip )
+    .on("mousemove", moveTooltip )
+    .on("mouseleave", hideTooltip )
+
+  })
+</script>
